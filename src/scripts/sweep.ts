@@ -1,6 +1,7 @@
 import { gsap } from 'gsap';
 import type Lenis from 'lenis';
 import { dur } from './tokens';
+import { createDust } from './dust';
 
 interface SweepOptions {
   hero: HTMLElement;
@@ -183,6 +184,8 @@ function createBroom(hero: HTMLElement, stage: HTMLElement) {
   const noop = { move: (_e: PointerEvent) => {}, press: (_on: boolean, _type: string) => {}, destroy: () => {} };
   if (!el) return noop;
 
+  const dust = createDust(hero.querySelector<HTMLCanvasElement>('[data-dust]'), stage);
+
   const x = gsap.quickTo(el, 'x', { duration: 0.12, ease: 'power3.out' });
   const y = gsap.quickTo(el, 'y', { duration: 0.12, ease: 'power3.out' });
   const lean = gsap.quickTo(el, 'rotation', { duration: dur('slow'), ease: 'hnt-out' });
@@ -194,9 +197,23 @@ function createBroom(hero: HTMLElement, stage: HTMLElement) {
 
   if (finePointer) hero.classList.add('has-broom');
 
+  // Dust follows the rendered bristles rather than the pointer, which runs slightly ahead.
+  const img = el.querySelector<HTMLElement>('img');
+  const trail = () =>
+    dust.sweep({
+      x: gsap.getProperty(el, 'x') as number,
+      y: gsap.getProperty(el, 'y') as number,
+      rotation: gsap.getProperty(el, 'rotation') as number,
+      width: (img?.offsetWidth ?? 88) * (gsap.getProperty(el, 'scaleX') as number),
+      pressed,
+    });
+
   const show = (on: boolean) => {
     if (on === visible) return;
     visible = on;
+    dust.reset();
+    if (on) gsap.ticker.add(trail);
+    else gsap.ticker.remove(trail);
     gsap.to(el, { autoAlpha: on ? 1 : 0, duration: dur('fast'), ease: 'none', overwrite: 'auto' });
   };
 
@@ -253,6 +270,8 @@ function createBroom(hero: HTMLElement, stage: HTMLElement) {
       stage.removeEventListener('pointerleave', onLeave);
       stage.removeEventListener('pointermove', onMoveIdle);
       window.clearTimeout(idle);
+      gsap.ticker.remove(trail);
+      dust.destroy();
       hero.classList.remove('has-broom');
       gsap.set(el, { autoAlpha: 0 });
     },

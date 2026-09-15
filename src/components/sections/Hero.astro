@@ -137,6 +137,9 @@ const heroStyle = `--broom-cursor: url("${broomCursor.src}") ${hotspot}; --tip-x
       <div class="hero__glow" data-glow aria-hidden="true"></div>
       <div class="hero__top-scrim" aria-hidden="true"></div>
 
+      <!-- Dust kicked up by the broom, drawn by scripts/dust.ts. -->
+      <canvas class="hero__dust" data-dust aria-hidden="true"></canvas>
+
       <!-- Live broom pointer, positioned by scripts/sweep.ts. Its origin is the bristle edge. -->
       <div class="hero__broom" data-broom aria-hidden="true">
         <Image src={heroBroom.image} alt="" width={96} densities={[2]} class="hero__broom-img" loading="eager" decoding="async" />
@@ -328,6 +331,7 @@ const heroStyle = `--broom-cursor: url("${broomCursor.src}") ${hotspot}; --tip-x
   .hero__veil,
   .hero__glow,
   .hero__top-scrim,
+  .hero__dust,
   .hero__broom,
   .hero__progress {
     display: none;
@@ -497,6 +501,17 @@ const heroStyle = `--broom-cursor: url("${broomCursor.src}") ${hotspot}; --tip-x
     visibility: hidden;
     pointer-events: none;
     transform-origin: 0 0;
+  }
+
+  /* Sits under the broom so the bristles stay on top of their own dust */
+  :global(html.motion-ok) .hero__dust {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 6;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
   }
 
   .hero__broom :global(.hero__broom-img) {
