@@ -1,0 +1,163 @@
+---
+interface Item {
+  id: string;
+  question: string;
+  answer: string;
+}
+
+interface Props {
+  /** Prefix for generated ids, unique per page. */
+  id: string;
+  items: Item[];
+  /** Index of the item open on load. Without JavaScript every item is open. */
+  defaultOpen?: number;
+}
+
+const { id, items, defaultOpen = 0 } = Astro.props;
+---
+
+<div class="accordion" data-accordion>
+  {
+    items.map((item, i) => {
+      const open = i === defaultOpen;
+      const triggerId = `${id}-${item.id}-trigger`;
+      const panelId = `${id}-${item.id}-panel`;
+      return (
+        <div class:list={['accordion__item', { 'is-open': open }]} data-accordion-item data-reveal>
+          <h3 class="accordion__heading">
+            <button
+              type="button"
+              id={triggerId}
+              class="accordion__trigger"
+              aria-expanded={String(open)}
+              aria-controls={panelId}
+              data-accordion-trigger
+            >
+              <span class="accordion__question">{item.question}</span>
+              <span class="accordion__icon" aria-hidden="true">
+                <svg viewBox="0 0 16 16" width="16" height="16" focusable="false">
+                  <path d="M8 3v10M3 8h10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+                </svg>
+              </span>
+            </button>
+          </h3>
+          <div id={panelId} class="accordion__panel" role="region" aria-labelledby={triggerId} data-accordion-panel>
+            <div class="accordion__clip">
+              <p class="accordion__answer">{item.answer}</p>
+            </div>
+          </div>
+        </div>
+      );
+    })
+  }
+</div>
+
+<style>
+  .accordion {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .accordion__item {
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-xs);
+    transition:
+      border-color var(--dur-base) var(--ease-out),
+      box-shadow var(--dur-base) var(--ease-out);
+  }
+
+  .accordion__item:hover,
+  .accordion__item.is-open {
+    border-color: var(--color-primary-200);
+  }
+
+  .accordion__item.is-open {
+    box-shadow: var(--shadow-sm);
+  }
+
+  .accordion__trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    width: 100%;
+    min-height: 4.25rem;
+    padding: 1rem clamp(1.25rem, 2.4vw, 1.75rem);
+    border: 0;
+    border-radius: inherit;
+    background: none;
+    color: var(--color-navy-900);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .accordion__question {
+    font-size: var(--text-body-lg);
+    line-height: var(--text-h4--line-height);
+    letter-spacing: var(--text-h4--letter-spacing);
+    font-weight: 600;
+    text-wrap: pretty;
+  }
+
+  .accordion__icon {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid var(--color-gray-300);
+    border-radius: var(--radius-pill);
+    color: var(--color-navy-900);
+    transition:
+      transform var(--dur-slow) var(--ease-inout),
+      border-color var(--dur-base) var(--ease-out),
+      background-color var(--dur-base) var(--ease-out);
+  }
+
+  .accordion__trigger:hover .accordion__icon {
+    border-color: var(--color-primary-700);
+  }
+
+  /* Plus turns into a close mark */
+  .accordion__item.is-open .accordion__icon {
+    transform: rotate(135deg);
+    border-color: transparent;
+    background-image: var(--grad-brand);
+  }
+
+  .accordion__panel {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition:
+      grid-template-rows var(--dur-slow) var(--ease-inout),
+      visibility 0s linear 0s;
+  }
+
+  .accordion__clip {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .accordion__answer {
+    max-width: 62ch;
+    padding: 0 clamp(1.25rem, 2.4vw, 1.75rem) 1.5rem;
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    color: var(--color-text-body);
+    text-wrap: pretty;
+  }
+
+  /* Collapsed only once JavaScript is confirmed, so every answer stays readable without it.
+     Visibility waits for the close to finish, then removes the answer from focus and the accessibility tree. */
+  :global(html.js) .accordion__item:not(.is-open) .accordion__panel {
+    grid-template-rows: 0fr;
+    visibility: hidden;
+    transition:
+      grid-template-rows var(--dur-slow) var(--ease-inout),
+      visibility 0s linear var(--dur-slow);
+  }
+</style>

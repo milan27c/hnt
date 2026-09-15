@@ -1,0 +1,73 @@
+---
+import SectionHeading from '../ui/SectionHeading.astro';
+import Accordion from '../ui/Accordion.astro';
+import { faqIntro, faqs, faqFollowUp } from '../../data/faqs';
+---
+
+<section id="faq" class="faq" aria-labelledby="faq-heading">
+  <div class="container-site faq__inner">
+    <SectionHeading id="faq-heading" eyebrow={faqIntro.eyebrow} title={faqIntro.title} lead={faqIntro.lead} />
+
+    <div class="faq__list">
+      <Accordion id="faq" items={faqs} defaultOpen={0} />
+    </div>
+
+    <p class="faq__follow-up" data-reveal>
+      {faqFollowUp.text}{' '}
+      <a href={faqFollowUp.link.href} class="faq__link">{faqFollowUp.link.label}</a>
+    </p>
+  </div>
+</section>
+
+<style>
+  /* Follows the light Awards section, so only the bottom padding is needed */
+  .faq {
+    padding-bottom: var(--section-y);
+  }
+
+  .faq__inner {
+    max-width: calc(var(--container-nr) + var(--gutter) * 2);
+  }
+
+  .faq__list {
+    max-width: 52rem;
+    margin: clamp(2.5rem, 5vw, 4rem) auto 0;
+  }
+
+  .faq__follow-up {
+    margin-top: 2rem;
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    color: var(--color-text-body);
+    text-align: center;
+  }
+
+  /* Cyan underline wipes in from the left */
+  .faq__link {
+    position: relative;
+    display: inline-block;
+    font-weight: 500;
+    color: var(--color-text-accent);
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+  }
+
+  .faq__link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.125rem;
+    height: 2px;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-primary-500);
+    transform: scaleX(0.35);
+    transform-origin: left center;
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+
+  .faq__link:hover::after,
+  .faq__link:focus-visible::after {
+    transform: scaleX(1);
+  }
+</style>

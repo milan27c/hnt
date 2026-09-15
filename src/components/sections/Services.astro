@@ -1,0 +1,139 @@
+---
+import SectionHeading from '../ui/SectionHeading.astro';
+import MediaFrame from '../ui/MediaFrame.astro';
+import Button from '../ui/Button.astro';
+import { servicesIntro, services, serviceCta } from '../../data/services';
+---
+
+<section id="services" class="services" aria-labelledby="services-heading">
+  <div class="container-site">
+    <SectionHeading id="services-heading" eyebrow={servicesIntro.eyebrow} title={servicesIntro.title} lead={servicesIntro.lead} />
+
+    <ul class="services__grid">
+      {
+        services.map((service) => (
+          <li data-reveal>
+            <article class="service-card" aria-labelledby={`service-${service.id}`}>
+              <MediaFrame
+                src={service.image}
+                alt={service.alt}
+                sizes="(min-width: 64rem) 400px, (min-width: 48rem) 50vw, 100vw"
+                class="service-card__media"
+                imgClass="service-card__img"
+              />
+              <div class="service-card__body">
+                <h3 id={`service-${service.id}`} class="service-card__title">
+                  {service.title}
+                </h3>
+                <p class="service-card__text">{service.description}</p>
+                <div class="service-card__action">
+                  <Button href={service.href} variant="ghost" size="sm" arrow>
+                    {serviceCta}
+                    <span class="sr-only"> for {service.title}</span>
+                  </Button>
+                </div>
+              </div>
+            </article>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .services {
+    padding-bottom: var(--section-y);
+  }
+
+  .services__grid {
+    display: grid;
+    gap: 1.25rem;
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  .services__grid > li {
+    display: flex;
+  }
+
+  .service-card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 0.625rem;
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-xl);
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+    transition:
+      transform var(--dur-base) var(--ease-out),
+      box-shadow var(--dur-base) var(--ease-out),
+      border-color var(--dur-base) var(--ease-out);
+  }
+
+  .service-card:hover,
+  .service-card:focus-within {
+    transform: translateY(-6px);
+    border-color: var(--color-primary-200);
+    box-shadow: var(--shadow-md);
+  }
+
+  .service-card :global(.service-card__media) {
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-lg);
+  }
+
+  .service-card :global(.service-card__img) {
+    transition: transform var(--dur-slow) var(--ease-out);
+  }
+
+  .service-card:hover :global(.service-card__img) {
+    transform: scale(1.04);
+  }
+
+  .service-card:hover :global(.btn__arrow) {
+    transform: translateX(4px);
+  }
+
+  .service-card__body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.625rem;
+    padding: 1.25rem 0.875rem 0.875rem;
+  }
+
+  .service-card__title {
+    font-size: var(--text-h4);
+    line-height: var(--text-h4--line-height);
+    letter-spacing: var(--text-h4--letter-spacing);
+    font-weight: var(--text-h4--font-weight);
+    color: var(--color-navy-900);
+  }
+
+  .service-card__text {
+    max-width: 62ch;
+    font-size: var(--text-body-sm);
+    line-height: var(--text-body-sm--line-height);
+    color: var(--color-text-body);
+    text-wrap: pretty;
+  }
+
+  .service-card__action {
+    margin-top: auto;
+    padding-top: 0.875rem;
+  }
+
+  @media (min-width: 48rem) {
+    .services__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .services__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

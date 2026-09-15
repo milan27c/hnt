@@ -1,0 +1,124 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends Omit<HTMLAttributes<'a'>, 'type'> {
+  /** Renders a link when set, otherwise a native button. */
+  href?: string;
+  type?: 'button' | 'submit';
+  variant?: 'primary' | 'ghost-light' | 'ghost';
+  size?: 'sm' | 'md';
+  arrow?: boolean;
+}
+
+const { href, type = 'button', variant = 'primary', size = 'md', arrow = false, class: className, ...rest } = Astro.props;
+
+const Tag = href ? 'a' : 'button';
+const tagProps = href ? { href } : { type };
+---
+
+<Tag {...tagProps} class:list={['btn', `btn--${variant}`, `btn--${size}`, className]} {...rest}>
+  <span class="btn__label"><slot /></span>
+  {
+    arrow && (
+      <svg class="btn__arrow" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+        <path d="M3 8h9.5M8.5 3.5 13 8l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    )
+  }
+</Tag>
+
+<style>
+  .btn {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: var(--tap);
+    border-radius: var(--radius-pill);
+    font-size: var(--text-button);
+    line-height: var(--text-button--line-height);
+    letter-spacing: var(--text-button--letter-spacing);
+    font-weight: var(--text-button--font-weight);
+    white-space: nowrap;
+    text-decoration: none;
+    border: 0;
+    cursor: pointer;
+    transition:
+      color var(--dur-fast) var(--ease-out),
+      background-color var(--dur-base) var(--ease-out),
+      border-color var(--dur-base) var(--ease-out),
+      background-position var(--dur-slow) var(--ease-out);
+  }
+
+  .btn--sm {
+    padding-inline: 1.25rem;
+  }
+
+  .btn--md {
+    min-height: 3.25rem;
+    padding-inline: 1.75rem;
+  }
+
+  .btn__arrow {
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+
+  .btn:hover .btn__arrow {
+    transform: translateX(4px);
+  }
+
+  /* Primary: brand gradient, navy text, glow fades in on hover */
+  .btn--primary {
+    color: var(--color-navy-900);
+    background-image: var(--grad-brand);
+    background-size: 200% 100%;
+    background-position: 0% 50%;
+  }
+
+  .btn--primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    box-shadow: var(--shadow-glow);
+    opacity: 0;
+    transition: opacity var(--dur-base) var(--ease-out);
+  }
+
+  .btn--primary:hover {
+    background-position: 100% 50%;
+  }
+
+  .btn--primary:hover::after {
+    opacity: 1;
+  }
+
+  /* Ghost on imagery or dark grounds */
+  .btn--ghost-light {
+    color: var(--color-text-on-dark);
+    border: 1px solid color-mix(in srgb, var(--color-text-on-dark) 45%, transparent);
+    background-color: color-mix(in srgb, var(--color-navy-950) 18%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .btn--ghost-light:hover {
+    border-color: var(--color-text-on-dark);
+    background-color: color-mix(in srgb, var(--color-text-on-dark) 12%, transparent);
+  }
+
+  /* Ghost on light grounds */
+  .btn--ghost {
+    color: var(--color-navy-900);
+    border: 1px solid var(--color-gray-300);
+    background-color: transparent;
+  }
+
+  .btn--ghost:hover {
+    border-color: var(--color-primary-700);
+    background-color: var(--color-surface);
+  }
+</style>

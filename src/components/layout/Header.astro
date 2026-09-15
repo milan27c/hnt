@@ -1,0 +1,241 @@
+---
+import { Image } from 'astro:assets';
+import Button from '../ui/Button.astro';
+import MobileNav from './MobileNav.astro';
+import { primaryNav, quoteCta, site } from '../../data/site';
+import logo from '../../assets/images/logo.png';
+import logoReversed from '../../assets/images/logo-reversed.png';
+---
+
+<header class="site-header" data-header>
+  <div class="site-header__bg" aria-hidden="true"></div>
+  <div class="site-header__inner container-site">
+    <a href="#top" class="site-header__logo" aria-label={`${site.name} home`}>
+      <Image src={logoReversed} alt="" widths={[200, 400]} sizes="160px" loading="eager" class="logo logo--reversed" />
+      <Image src={logo} alt="" widths={[200, 400]} sizes="160px" loading="eager" class="logo logo--default" />
+    </a>
+
+    <nav class="site-header__nav" aria-label="Primary">
+      <ul>
+        {
+          primaryNav.map((link) => (
+            <li>
+              <a href={link.href} class="nav-link">
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="site-header__actions">
+      <Button href={quoteCta.href} size="sm" arrow class="site-header__cta">{quoteCta.label}</Button>
+      <button type="button" class="menu-toggle" data-menu-toggle aria-expanded="false" aria-controls="mobile-nav">
+        <span class="sr-only" data-menu-label>Open menu</span>
+        <span class="menu-toggle__bar menu-toggle__bar--top" aria-hidden="true"></span>
+        <span class="menu-toggle__bar menu-toggle__bar--bottom" aria-hidden="true"></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<MobileNav />
+
+<style>
+  .site-header {
+    position: fixed;
+    inset-inline: 0;
+    top: 0;
+    z-index: 50;
+    height: var(--header-h);
+    color: var(--color-text-on-dark);
+    transition: color var(--dur-base) var(--ease-out);
+  }
+
+  .site-header__bg {
+    position: absolute;
+    inset: 0;
+    background-color: var(--color-surface);
+    border-bottom: 1px solid var(--color-gray-200);
+    box-shadow: var(--shadow-xs);
+    opacity: 0;
+    transition: opacity var(--dur-base) var(--ease-out);
+  }
+
+  .site-header__inner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    height: 100%;
+  }
+
+  /* Solid state: after the hero, while the menu is open, or with no JS */
+  .site-header:global(.is-solid),
+  .site-header:global(.menu-open),
+  :global(html:not(.js)) .site-header {
+    color: var(--color-text-primary);
+  }
+
+  .site-header:global(.is-solid) .site-header__bg,
+  .site-header:global(.menu-open) .site-header__bg,
+  :global(html:not(.js)) .site-header__bg {
+    opacity: 1;
+  }
+
+  /* Logo: reversed over imagery, default on white */
+  .site-header__logo {
+    display: grid;
+    flex-shrink: 0;
+    border-radius: var(--radius-sm);
+  }
+
+  .site-header__logo :global(.logo) {
+    grid-area: 1 / 1;
+    width: auto;
+    height: 2.125rem;
+    transition: opacity var(--dur-base) var(--ease-out);
+  }
+
+  .site-header__logo :global(.logo--default) {
+    opacity: 0;
+  }
+
+  .site-header:global(.is-solid) :global(.logo--reversed),
+  .site-header:global(.menu-open) :global(.logo--reversed),
+  :global(html:not(.js)) .site-header :global(.logo--reversed) {
+    opacity: 0;
+  }
+
+  .site-header:global(.is-solid) :global(.logo--default),
+  .site-header:global(.menu-open) :global(.logo--default),
+  :global(html:not(.js)) .site-header :global(.logo--default) {
+    opacity: 1;
+  }
+
+  /* Desktop links */
+  .site-header__nav {
+    display: none;
+  }
+
+  .site-header__nav ul {
+    display: flex;
+    align-items: center;
+    gap: 2.25rem;
+  }
+
+  .nav-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap);
+    font-size: var(--text-body-sm);
+    font-weight: 500;
+    letter-spacing: var(--text-button--letter-spacing);
+    color: inherit;
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+  }
+
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.55rem;
+    height: 2px;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-primary-500);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+
+  .nav-link:hover::after,
+  .nav-link:focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  .site-header__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  :global(.site-header__cta) {
+    display: none !important;
+  }
+
+  /* Menu toggle */
+  .menu-toggle {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    width: var(--tap);
+    height: var(--tap);
+    border-radius: var(--radius-pill);
+    border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+    color: inherit;
+    cursor: pointer;
+    transition: border-color var(--dur-base) var(--ease-out);
+  }
+
+  .menu-toggle:hover {
+    border-color: currentColor;
+  }
+
+  .menu-toggle__bar {
+    position: absolute;
+    width: 1.125rem;
+    height: 1.5px;
+    border-radius: var(--radius-pill);
+    background-color: currentColor;
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+
+  .menu-toggle__bar--top {
+    transform: translateY(-3.5px);
+  }
+
+  .menu-toggle__bar--bottom {
+    transform: translateY(3.5px);
+  }
+
+  .menu-toggle[aria-expanded='true'] .menu-toggle__bar--top {
+    transform: rotate(45deg);
+  }
+
+  .menu-toggle[aria-expanded='true'] .menu-toggle__bar--bottom {
+    transform: rotate(-45deg);
+  }
+
+  /* The toggle needs JS; without it the page stays usable through the anchors in content. */
+  :global(html:not(.js)) .menu-toggle {
+    display: none;
+  }
+
+  @media (min-width: 30rem) {
+    :global(.site-header__cta) {
+      display: inline-flex !important;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .site-header__logo :global(.logo) {
+      height: 2.5rem;
+    }
+
+    .site-header__nav {
+      display: block;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .menu-toggle {
+      display: none;
+    }
+  }
+</style>

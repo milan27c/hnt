@@ -1,0 +1,282 @@
+---
+import { Image } from 'astro:assets';
+import { site, contact, credit, socials, footerNav } from '../../data/site';
+import { services } from '../../data/services';
+import logoReversed from '../../assets/images/logo-reversed.png';
+
+const year = new Date().getFullYear();
+const directContact = contact.filter((item) => item.href);
+
+const socialIcons: Record<(typeof socials)[number]['id'], string> = {
+  linkedin:
+    'M6.5 9.5v8M6.5 6.5v.01M10.5 17.5v-4.75c0-1.8 1.2-3.25 2.9-3.25s2.6 1.2 2.6 3v5M10.5 9.5v8',
+  facebook: 'M14.5 7.5h2v-3h-2.5A3.5 3.5 0 0 0 10.5 8v2.5h-2v3h2v7h3v-7h2.3l.7-3h-3V8.3c0-.5.4-.8.9-.8Z',
+  instagram:
+    'M8 3.5h8A4.5 4.5 0 0 1 20.5 8v8a4.5 4.5 0 0 1-4.5 4.5H8A4.5 4.5 0 0 1 3.5 16V8A4.5 4.5 0 0 1 8 3.5Zm4 12.25a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5ZM17 7v.01',
+};
+---
+
+<footer class="site-footer">
+  <div class="container-site">
+    <div class="site-footer__top">
+      <div class="site-footer__brand">
+        <a href="#top" class="site-footer__logo" aria-label={`${site.name} home`}>
+          <Image src={logoReversed} alt="" widths={[200, 400]} sizes="180px" class="site-footer__logo-img" />
+        </a>
+        <p class="site-footer__descriptor">{site.description}</p>
+        <p class="site-footer__tagline">{site.tagline}</p>
+        <ul class="site-footer__socials">
+          {
+            socials.map((social) => (
+              <li>
+                <a href={social.href} class="site-footer__social" aria-label={social.label}>
+                  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+                    <path d={socialIcons[social.id]} fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <nav class="site-footer__col" aria-labelledby="footer-explore">
+        <h2 id="footer-explore" class="site-footer__heading">Explore</h2>
+        <ul class="site-footer__links">
+          {
+            footerNav.map((link) => (
+              <li>
+                <a href={link.href} class="site-footer__link">
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <nav class="site-footer__col" aria-labelledby="footer-services">
+        <h2 id="footer-services" class="site-footer__heading">Services</h2>
+        <ul class="site-footer__links">
+          {
+            services.map((service) => (
+              <li>
+                <a href="#services" class="site-footer__link">
+                  {service.title}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div class="site-footer__col">
+        <h2 class="site-footer__heading">Contact</h2>
+        <ul class="site-footer__links">
+          {
+            directContact.map((item) => (
+              <li>
+                <a href={item.href} class="site-footer__link">
+                  <span class="sr-only">{item.label}: </span>
+                  {item.value}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+        <h2 class="site-footer__heading site-footer__heading--spaced">Service areas</h2>
+        <ul class="site-footer__areas">
+          {site.serviceAreas.map((area) => <li>{area}</li>)}
+        </ul>
+      </div>
+    </div>
+
+    <div class="site-footer__bottom">
+      <p>&copy; {year} {site.name}. All rights reserved.</p>
+      <p>
+        {credit.label}{' '}
+        <a href={credit.href} class="site-footer__link site-footer__credit" target="_blank" rel="noopener">{credit.name}</a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    padding-block: clamp(3.5rem, 7vw, 5.5rem) 2rem;
+    background-color: var(--color-navy-900);
+    color: var(--color-text-on-dark-mut);
+    border-top: 1px solid var(--color-navy-700);
+  }
+
+  .site-footer :global(:focus-visible) {
+    outline-color: var(--color-primary-400);
+  }
+
+  .site-footer__top {
+    display: grid;
+    gap: 2.5rem 2rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .site-footer__brand {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .site-footer__logo {
+    display: inline-flex;
+    border-radius: var(--radius-sm);
+  }
+
+  .site-footer__logo :global(.site-footer__logo-img) {
+    width: auto;
+    height: 2.5rem;
+  }
+
+  .site-footer__descriptor {
+    max-width: 44ch;
+    font-size: var(--text-body-sm);
+    line-height: var(--text-body-sm--line-height);
+    text-wrap: pretty;
+  }
+
+  .site-footer__tagline {
+    font-size: var(--text-body-sm);
+    line-height: var(--text-body-sm--line-height);
+    font-weight: 500;
+    color: var(--color-primary-400);
+  }
+
+  .site-footer__socials {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .site-footer__social {
+    display: grid;
+    place-items: center;
+    width: var(--tap);
+    height: var(--tap);
+    border: 1px solid var(--color-navy-700);
+    border-radius: var(--radius-pill);
+    color: var(--color-text-on-dark);
+    transition:
+      border-color var(--dur-base) var(--ease-out),
+      color var(--dur-fast) var(--ease-out);
+  }
+
+  .site-footer__social:hover {
+    border-color: var(--color-primary-500);
+    color: var(--color-primary-400);
+  }
+
+  .site-footer__heading {
+    margin-bottom: 1rem;
+    font-size: var(--text-body-sm);
+    line-height: var(--text-body-sm--line-height);
+    font-weight: 600;
+    color: var(--color-text-on-dark);
+  }
+
+  .site-footer__heading--spaced {
+    margin-top: 1.75rem;
+  }
+
+  .site-footer__links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .site-footer__link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap);
+    font-size: var(--text-body-sm);
+    line-height: var(--text-body-sm--line-height);
+    color: var(--color-text-on-dark-mut);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+    border-radius: var(--radius-sm);
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  /* Cyan underline wipes in from the left */
+  .site-footer__link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.625rem;
+    height: 1px;
+    background-color: var(--color-primary-500);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+
+  .site-footer__link:hover {
+    color: var(--color-text-on-dark);
+  }
+
+  .site-footer__link:hover::after,
+  .site-footer__link:focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  .site-footer__credit {
+    font-size: inherit;
+    line-height: inherit;
+    font-weight: 500;
+    color: var(--color-text-on-dark);
+  }
+
+  .site-footer__areas {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: var(--text-body-sm);
+    line-height: var(--text-body-sm--line-height);
+  }
+
+  .site-footer__bottom {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-navy-700);
+    font-size: var(--text-caption);
+    line-height: var(--text-caption--line-height);
+    letter-spacing: var(--text-caption--letter-spacing);
+  }
+
+  @media (min-width: 48rem) {
+    .site-footer__top {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .site-footer__bottom {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .site-footer__top {
+      grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr));
+      gap: 3rem;
+    }
+
+    .site-footer__brand {
+      grid-column: auto;
+    }
+  }
+</style>

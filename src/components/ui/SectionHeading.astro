@@ -1,0 +1,115 @@
+---
+interface Props {
+  id: string;
+  eyebrow?: string;
+  title: string;
+  /** Words appended to the title with the neon text treatment. Dark tone only. */
+  accent?: string;
+  lead?: string;
+  align?: 'center' | 'start';
+  tone?: 'light' | 'dark';
+}
+
+const { id, eyebrow, title, accent, lead, align = 'center', tone = 'light' } = Astro.props;
+---
+
+<div class:list={['section-heading', `section-heading--${align}`, `section-heading--${tone}`]}>
+  {
+    eyebrow && (
+      <p class="section-heading__eyebrow" data-reveal>
+        <span class="section-heading__dot" aria-hidden="true" />
+        {eyebrow}
+      </p>
+    )
+  }
+  <h2 id={id} class="section-heading__title" data-reveal>
+    {title}
+    {accent && tone === 'dark' && ' '}
+    {accent && tone === 'dark' && <span class="section-heading__accent">{accent}</span>}
+  </h2>
+  {lead && <p class="section-heading__lead" data-reveal>{lead}</p>}
+</div>
+
+<style>
+  .section-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .section-heading--center {
+    align-items: center;
+    text-align: center;
+  }
+
+  .section-heading--start {
+    align-items: flex-start;
+  }
+
+  /* Sentence case pill, never small uppercase */
+  .section-heading__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.875rem 0.375rem 0.75rem;
+    border: 1px solid var(--color-primary-200);
+    border-radius: var(--radius-pill);
+    background-color: var(--color-primary-50);
+    font-size: var(--text-caption);
+    line-height: var(--text-caption--line-height);
+    letter-spacing: var(--text-caption--letter-spacing);
+    font-weight: var(--text-caption--font-weight);
+    color: var(--color-text-accent);
+  }
+
+  .section-heading__dot {
+    width: 0.4375rem;
+    height: 0.4375rem;
+    border-radius: var(--radius-pill);
+    background-image: var(--grad-brand);
+    box-shadow: 0 0 0 3px var(--color-primary-100);
+  }
+
+  .section-heading__title {
+    max-width: 22ch;
+    font-size: var(--text-h2);
+    line-height: var(--text-h2--line-height);
+    letter-spacing: var(--text-h2--letter-spacing);
+    font-weight: var(--text-h2--font-weight);
+    color: var(--color-navy-900);
+    text-wrap: balance;
+  }
+
+  .section-heading__lead {
+    max-width: 58ch;
+    font-size: var(--text-body-lg);
+    line-height: var(--text-body-lg--line-height);
+    letter-spacing: var(--text-body-lg--letter-spacing);
+    color: var(--color-text-body);
+    text-wrap: pretty;
+  }
+
+  .section-heading--dark .section-heading__title {
+    color: var(--color-text-on-dark);
+  }
+
+  .section-heading--dark .section-heading__lead {
+    color: var(--color-text-on-dark-mut);
+  }
+
+  /* Neon accent, dark sections only. Solid colour first as the fallback. */
+  .section-heading__accent {
+    color: var(--color-primary-400);
+  }
+
+  @supports (background-clip: text) or (-webkit-background-clip: text) {
+    .section-heading__accent {
+      background-image: var(--grad-text);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-box-decoration-break: clone;
+      box-decoration-break: clone;
+      color: transparent;
+    }
+  }
+</style>

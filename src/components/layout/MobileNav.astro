@@ -1,0 +1,114 @@
+---
+import Button from '../ui/Button.astro';
+import { primaryNav, quoteCta, site } from '../../data/site';
+---
+
+<div id="mobile-nav" class="mobile-nav" data-mobile-nav hidden>
+  <nav class="mobile-nav__inner container-site" aria-label="Mobile">
+    <ul class="mobile-nav__list">
+      {
+        primaryNav.map((link, i) => (
+          <li class="mobile-nav__item" style={`--i: ${i}`}>
+            <a href={link.href} class="mobile-nav__link" data-menu-link>
+              <span>{link.label}</span>
+              <svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true" focusable="false">
+                <path d="M3 8h9.5M8.5 3.5 13 8l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="mobile-nav__item mobile-nav__footer" style={`--i: ${primaryNav.length}`}>
+      <Button href={quoteCta.href} arrow class="mobile-nav__cta" data-menu-link>{quoteCta.label}</Button>
+      <p>Commercial cleaning and facility maintenance across {site.serviceAreas.join(' and ')}.</p>
+    </div>
+  </nav>
+</div>
+
+<style>
+  .mobile-nav {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-top: var(--header-h);
+    background-color: var(--color-surface);
+    opacity: 0;
+    transition: opacity var(--dur-base) var(--ease-out);
+  }
+
+  .mobile-nav:global(.is-open) {
+    opacity: 1;
+  }
+
+  .mobile-nav__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    min-height: 100%;
+    padding-block: 1.5rem 2.5rem;
+  }
+
+  .mobile-nav__item {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity var(--dur-slow) var(--ease-out),
+      transform var(--dur-slow) var(--ease-out);
+    transition-delay: calc(var(--dur-fast) * 0.5 + var(--i) * var(--stagger));
+  }
+
+  .mobile-nav:global(.is-open) .mobile-nav__item {
+    opacity: 1;
+    transform: none;
+  }
+
+  .mobile-nav__link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 4.5rem;
+    border-bottom: 1px solid var(--color-gray-200);
+    color: var(--color-navy-900);
+    font-size: var(--text-h3);
+    line-height: var(--text-h3--line-height);
+    letter-spacing: var(--text-h3--letter-spacing);
+    font-weight: var(--text-h3--font-weight);
+    text-decoration: none;
+  }
+
+  .mobile-nav__link svg {
+    color: var(--color-primary-700);
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+
+  .mobile-nav__link:hover svg {
+    transform: translateX(4px);
+  }
+
+  .mobile-nav__footer {
+    margin-top: auto;
+    display: grid;
+    gap: 1rem;
+  }
+
+  .mobile-nav__footer :global(.mobile-nav__cta) {
+    width: 100%;
+  }
+
+  .mobile-nav__footer p {
+    max-width: 62ch;
+    color: var(--color-text-muted);
+    font-size: var(--text-body-sm);
+    line-height: var(--text-body-sm--line-height);
+  }
+
+  @media (min-width: 64rem) {
+    .mobile-nav {
+      display: none !important;
+    }
+  }
+</style>

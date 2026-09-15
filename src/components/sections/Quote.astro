@@ -1,0 +1,568 @@
+---
+import SectionHeading from '../ui/SectionHeading.astro';
+import Button from '../ui/Button.astro';
+import { contact } from '../../data/site';
+import { quoteIntro, quoteContactTitle, quoteForm, quoteFields } from '../../data/quote';
+
+const icons: Record<(typeof contact)[number]['id'], string> = {
+  phone:
+    'M6.6 3.5h2.6l1.3 3.6-1.8 1.2a9.6 9.6 0 0 0 5 5l1.2-1.8 3.6 1.3v2.6a2 2 0 0 1-2.2 2A14.6 14.6 0 0 1 4.6 5.7a2 2 0 0 1 2-2.2Z',
+  email: 'M3.5 6.5A1.5 1.5 0 0 1 5 5h14a1.5 1.5 0 0 1 1.5 1.5v11A1.5 1.5 0 0 1 19 19H5a1.5 1.5 0 0 1-1.5-1.5v-11Zm.4-.8L12 12l8.1-6.3',
+  address: 'M12 20.5s6.5-5.8 6.5-11a6.5 6.5 0 0 0-13 0c0 5.2 6.5 11 6.5 11Zm0-8.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z',
+  areas:
+    'M12 20.5a8.5 8.5 0 1 0 0-17 8.5 8.5 0 0 0 0 17Zm-8.5-8.5h17M12 3.5c2.2 2.3 3.3 5.2 3.3 8.5s-1.1 6.2-3.3 8.5c-2.2-2.3-3.3-5.2-3.3-8.5S9.8 5.8 12 3.5Z',
+};
+
+// Without JavaScript the form only posts when a real endpoint is configured.
+const formAttrs = quoteForm.endpoint ? { action: quoteForm.endpoint, method: 'post' } : { action: '#quote', method: 'get' };
+---
+
+<section id="quote" class="quote" aria-labelledby="quote-heading">
+  <div class="quote__glow" aria-hidden="true"></div>
+
+  <div class="container-site quote__grid">
+    <div class="quote__aside">
+      <SectionHeading
+        id="quote-heading"
+        eyebrow={quoteIntro.eyebrow}
+        title={quoteIntro.title.lead}
+        accent={quoteIntro.title.accent}
+        lead={quoteIntro.lead}
+        align="start"
+        tone="dark"
+      />
+
+      <div class="contact" data-reveal>
+        <h3 class="contact__title">{quoteContactTitle}</h3>
+        <ul class="contact__list">
+          {
+            contact.map((item) => (
+              <li class="contact__item">
+                <span class="contact__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="20" height="20" focusable="false">
+                    <path d={icons[item.id]} fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </span>
+                <span class="contact__meta">
+                  <span class="contact__label">{item.label}</span>
+                  {item.href ? (
+                    <a href={item.href} class="contact__value contact__link">
+                      {item.value}
+                    </a>
+                  ) : (
+                    <span class="contact__value">{item.value}</span>
+                  )}
+                </span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+
+    <div class="quote__panel" data-reveal>
+      <div class="form-card" data-quote-form-card>
+        <form class="form" {...formAttrs} data-quote-form data-endpoint={quoteForm.endpoint ?? undefined} aria-labelledby="quote-form-title">
+          <div class="form__head">
+            <h3 id="quote-form-title" class="form__title">{quoteForm.title}</h3>
+            <p class="form__note">{quoteForm.note}</p>
+          </div>
+
+          <div class="form__fields">
+            {
+              quoteFields.map((field) => {
+                const errorId = `${field.id}-error`;
+                const shared = {
+                  id: field.id,
+                  name: field.name,
+                  required: true,
+                  'aria-describedby': errorId,
+                  'data-field': '',
+                  'data-error-required': field.errors.required,
+                  'data-error-format': field.errors.format,
+                };
+                return (
+                  <div class:list={['field', `field--${field.width}`, `field--${field.type}`]}>
+                    <label for={field.id} class="field__label">
+                      {field.label}
+                    </label>
+                    {field.type === 'textarea' ? (
+                      <textarea {...shared} class="field__control" rows="5" placeholder={field.placeholder} />
+                    ) : field.type === 'select' ? (
+                      <span class="field__select">
+                        <select {...shared} class="field__control">
+                          <option value="" disabled selected>
+                            {field.placeholder}
+                          </option>
+                          {field.options?.map((option) => (
+                            <option value={option}>{option}</option>
+                          ))}
+                        </select>
+                        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+                          <path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                      </span>
+                    ) : (
+                      <input
+                        {...shared}
+                        class="field__control"
+                        type={field.type}
+                        autocomplete={field.autocomplete}
+                        placeholder={field.placeholder}
+                        inputmode={field.type === 'tel' ? 'tel' : undefined}
+                      />
+                    )}
+                    <p id={errorId} class="field__error" data-field-error />
+                  </div>
+                );
+              })
+            }
+          </div>
+
+          <div class="form__footer">
+            <Button type="submit" arrow class="form__submit" data-form-submit>
+              <span data-form-submit-label>{quoteForm.submit}</span>
+            </Button>
+            <p class="form__status" role="status" aria-live="polite" data-form-status></p>
+          </div>
+        </form>
+
+        <div class="form-success" data-form-success hidden>
+          <span class="form-success__tile" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="28" height="28" focusable="false">
+              <path d="m5.5 12.5 4.2 4.2 8.8-9.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+          <h3 class="form-success__title" tabindex="-1" data-form-success-title>{quoteForm.success.title}</h3>
+          <p class="form-success__text">{quoteForm.success.body}</p>
+          <Button variant="ghost-light" data-form-reset>{quoteForm.success.reset}</Button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .quote {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding-block: var(--section-y);
+    background-color: var(--color-bg-dark);
+    background-image: var(--grad-deep);
+    color: var(--color-text-on-dark);
+  }
+
+  .quote__glow {
+    position: absolute;
+    top: 10%;
+    right: -20%;
+    z-index: -1;
+    width: min(70rem, 140%);
+    aspect-ratio: 1;
+    background: radial-gradient(circle at center, color-mix(in srgb, var(--color-primary-500) 15%, transparent) 0%, transparent 60%);
+    filter: blur(40px);
+    pointer-events: none;
+  }
+
+  .quote__grid {
+    display: grid;
+    gap: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  .quote__aside {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(2rem, 4vw, 3rem);
+  }
+
+  .quote__aside :global(.section-heading__title) {
+    max-width: 14ch;
+  }
+
+  .quote :global(:focus-visible) {
+    outline-color: var(--color-primary-400);
+  }
+
+  /* ---------------------------------------------------------------------------
+   * Direct contact details
+   * ------------------------------------------------------------------------- */
+  .contact {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .contact__title {
+    font-size: var(--text-h4);
+    line-height: var(--text-h4--line-height);
+    letter-spacing: var(--text-h4--letter-spacing);
+    font-weight: var(--text-h4--font-weight);
+    color: var(--color-text-on-dark);
+  }
+
+  .contact__list {
+    display: grid;
+    border-top: 1px solid var(--color-navy-700);
+  }
+
+  .contact__item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-block: 1rem;
+    border-bottom: 1px solid var(--color-navy-700);
+  }
+
+  .contact__icon {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--color-navy-700);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface-dark);
+    color: var(--color-primary-400);
+  }
+
+  .contact__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+  }
+
+  .contact__label {
+    font-size: var(--text-caption);
+    line-height: var(--text-caption--line-height);
+    letter-spacing: var(--text-caption--letter-spacing);
+    font-weight: var(--text-caption--font-weight);
+    color: var(--color-text-on-dark-mut);
+  }
+
+  .contact__value {
+    font-size: var(--text-body);
+    line-height: var(--text-body-sm--line-height);
+    font-weight: 500;
+    color: var(--color-text-on-dark);
+    overflow-wrap: anywhere;
+  }
+
+  /* Cyan underline wipes in from the left */
+  .contact__link {
+    position: relative;
+    align-self: flex-start;
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+  }
+
+  .contact__link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.0625rem;
+    height: 2px;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-primary-500);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+
+  .contact__link:hover::after,
+  .contact__link:focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  /* ---------------------------------------------------------------------------
+   * Form card
+   * ------------------------------------------------------------------------- */
+  .quote__panel {
+    display: flex;
+  }
+
+  .form-card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: clamp(1.5rem, 3.5vw, 3rem);
+    border: 1px solid color-mix(in srgb, var(--color-text-on-dark) 10%, transparent);
+    border-radius: var(--radius-xl);
+    background-color: color-mix(in srgb, var(--color-navy-950) 55%, transparent);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+  }
+
+  .form__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+  }
+
+  .form__title {
+    font-size: var(--text-h4);
+    line-height: var(--text-h4--line-height);
+    letter-spacing: var(--text-h4--letter-spacing);
+    font-weight: var(--text-h4--font-weight);
+    color: var(--color-text-on-dark);
+  }
+
+  .form__note {
+    font-size: var(--text-caption);
+    line-height: var(--text-caption--line-height);
+    letter-spacing: var(--text-caption--letter-spacing);
+    color: var(--color-text-on-dark-mut);
+  }
+
+  .form__fields {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  .field__label {
+    font-size: var(--text-body-sm);
+    line-height: var(--text-body-sm--line-height);
+    font-weight: 500;
+    color: var(--color-text-on-dark);
+  }
+
+  .field__control {
+    width: 100%;
+    min-height: 3.25rem;
+    padding: 0.75rem 1.25rem;
+    border: 1px solid var(--color-navy-600);
+    border-radius: var(--radius-pill);
+    background-color: var(--color-surface-dark);
+    color: var(--color-text-on-dark);
+    font: inherit;
+    font-size: var(--text-body);
+    line-height: var(--text-body-sm--line-height);
+    transition:
+      border-color var(--dur-fast) var(--ease-out),
+      box-shadow var(--dur-fast) var(--ease-out),
+      background-color var(--dur-fast) var(--ease-out);
+  }
+
+  .field__control::placeholder {
+    color: var(--color-navy-400);
+    opacity: 1;
+  }
+
+  .field__control:hover {
+    border-color: var(--color-navy-500);
+  }
+
+  .field__control:focus {
+    outline: none;
+    border-color: var(--color-primary-400);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary-500) 28%, transparent);
+  }
+
+  textarea.field__control {
+    min-height: 9rem;
+    border-radius: var(--radius-lg);
+    resize: vertical;
+  }
+
+  .field__select {
+    position: relative;
+    display: block;
+  }
+
+  .field__select select {
+    appearance: none;
+    padding-right: 3rem;
+    cursor: pointer;
+  }
+
+  /* The placeholder option reads as a hint until a reason is picked */
+  .field__select select:has(option[value='']:checked) {
+    color: var(--color-navy-400);
+  }
+
+  .field__select option {
+    background-color: var(--color-surface-dark);
+    color: var(--color-text-on-dark);
+  }
+
+  .field__select svg {
+    position: absolute;
+    top: 50%;
+    right: 1.25rem;
+    color: var(--color-text-on-dark-mut);
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  /* The palette has no red, so errors use a bright outline, an icon and a written message */
+  .field__control[aria-invalid='true'] {
+    border-color: var(--color-primary-200);
+    box-shadow: inset 0 0 0 1px var(--color-primary-200);
+  }
+
+  .field__error {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding-left: 0.25rem;
+    font-size: var(--text-caption);
+    line-height: var(--text-caption--line-height);
+    letter-spacing: var(--text-caption--letter-spacing);
+    font-weight: var(--text-caption--font-weight);
+    color: var(--color-primary-100);
+  }
+
+  .field__error::before {
+    content: '!';
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 1.125rem;
+    height: 1.125rem;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-primary-300);
+    color: var(--color-navy-900);
+    font-size: 0.75rem;
+    line-height: 1;
+    font-weight: 700;
+  }
+
+  .field__error:empty {
+    display: none;
+  }
+
+  .form__footer {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .form :global(.form__submit) {
+    width: 100%;
+  }
+
+  .form :global(.form__submit[aria-disabled='true']) {
+    cursor: progress;
+    opacity: 0.8;
+  }
+
+  .form__status {
+    font-size: var(--text-body-sm);
+    line-height: var(--text-body-sm--line-height);
+    font-weight: 500;
+    color: var(--color-text-on-dark);
+  }
+
+  .form__status:empty {
+    display: none;
+  }
+
+  /* ---------------------------------------------------------------------------
+   * Success state
+   * ------------------------------------------------------------------------- */
+  .form-success {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    flex: 1;
+    gap: 1rem;
+  }
+
+  .form-success[hidden] {
+    display: none;
+  }
+
+  .form-success__tile {
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: var(--radius-md);
+    background-image: var(--grad-brand);
+    box-shadow: var(--shadow-glow);
+    color: var(--color-navy-900);
+  }
+
+  .form-success__title {
+    max-width: 20ch;
+    font-size: var(--text-h3);
+    line-height: var(--text-h3--line-height);
+    letter-spacing: var(--text-h3--letter-spacing);
+    font-weight: var(--text-h3--font-weight);
+    color: var(--color-text-on-dark);
+    border-radius: var(--radius-sm);
+  }
+
+  .form-success__title:focus {
+    outline: none;
+  }
+
+  .form-success__text {
+    max-width: 44ch;
+    margin-bottom: 0.5rem;
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    color: var(--color-text-on-dark-mut);
+  }
+
+  @media (min-width: 48rem) {
+    .form__fields {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.25rem 1rem;
+    }
+
+    .field--full {
+      grid-column: 1 / -1;
+    }
+
+    .form__footer {
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .form :global(.form__submit) {
+      width: auto;
+      flex-shrink: 0;
+    }
+
+    .form-card {
+      border-radius: var(--radius-2xl);
+    }
+  }
+
+  /* 12 column split: contact details on 5, the form on 7 */
+  @media (min-width: 64rem) {
+    .quote__grid {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      align-items: start;
+    }
+
+    .quote__aside {
+      grid-column: span 5;
+      padding-right: clamp(0rem, 2vw, 2rem);
+    }
+
+    .quote__panel {
+      grid-column: span 7;
+    }
+  }
+</style>

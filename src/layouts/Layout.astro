@@ -1,0 +1,41 @@
+---
+import '../styles/global.css';
+import { site } from '../data/site';
+import favicon from '../assets/images/favicon.svg';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'Commercial Cleaning South Australia and Western Australia | HNT Facility Services',
+  description = site.description,
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en-AU">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#02163B" />
+    <link rel="icon" type="image/svg+xml" href={favicon.src} />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <!-- Flags set before first paint so JS enhanced layouts never shift. -->
+    <script is:inline>
+      document.documentElement.classList.add('js');
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.classList.add('motion-ok');
+      }
+    </script>
+  </head>
+  <body>
+    <slot />
+    <script>
+      import '../scripts/main';
+    </script>
+  </body>
+</html>
