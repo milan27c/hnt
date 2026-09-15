@@ -1,11 +1,23 @@
 ---
-import { Picture, Image, getImage } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import Button from '../ui/Button.astro';
 import { heroScenes, heroActions, heroBroom } from '../../data/hero';
 import cloudBank from '../../assets/images/clouds/bank.webp';
 import cloudPuffA from '../../assets/images/clouds/puff-a.webp';
 import cloudPuffB from '../../assets/images/clouds/puff-b.webp';
 import cloudWisp from '../../assets/images/clouds/wisp.webp';
+
+// Art directed sources: a 3:4 portrait below 768px, the 16:9 frame above it.
+const mobileMedia = '(max-width: 47.99rem)';
+const sourceFormats = ['avif', 'webp'] as const;
+const scenePictures = await Promise.all(
+  heroScenes.map(async (scene) => {
+    const build = (src: typeof scene.image, widths: number[]) =>
+      Promise.all(sourceFormats.map((format) => getImage({ src, widths, format })));
+    const [mobile, desktop] = await Promise.all([build(scene.mobileImage, [480, 768, 1086]), build(scene.image, [768, 1280, 1672])]);
+    return { mobile, desktop, fallback: desktop[1] };
+  }),
+);
 
 const cloudLayers = [
   { key: 'bank', src: cloudBank },
@@ -29,22 +41,38 @@ const heroStyle = `--broom-cursor: url("${broomCursor.src}") ${hotspot}; --tip-x
       {
         heroScenes.map((scene, i) => {
           const Heading = i === 0 ? 'h1' : 'h2';
+          const picture = scenePictures[i];
           return (
-            <div class="scene" data-scene={scene.id} data-pan-from={scene.panX?.[0]} data-pan-to={scene.panX?.[1]} style={`--focus-x: ${scene.focusX}%`}>
+            <div class="scene" data-scene={scene.id}>
               <div class="scene__media" data-media>
-                <Picture
-                  src={scene.image}
-                  alt={scene.alt}
-                  formats={['avif', 'webp']}
-                  fallbackFormat="webp"
-                  widths={[768, 1280, 1672]}
-                  sizes="(max-width: 767px) 225vw, 100vw"
-                  loading={i === 0 ? 'eager' : 'lazy'}
-                  fetchpriority={i === 0 ? 'high' : 'auto'}
-                  decoding="async"
-                  class="scene__img"
-                  data-img
-                />
+                <picture>
+                  {picture.mobile.map((img) => (
+                    <source
+                      media={mobileMedia}
+                      type={`image/${img.options.format}`}
+                      srcset={img.srcSet.attribute}
+                      sizes="100vw"
+                      width={scene.mobileImage.width}
+                      height={scene.mobileImage.height}
+                    />
+                  ))}
+                  {picture.desktop.map((img) => (
+                    <source type={`image/${img.options.format}`} srcset={img.srcSet.attribute} sizes="100vw" />
+                  ))}
+                  <img
+                    src={picture.fallback.src}
+                    srcset={picture.fallback.srcSet.attribute}
+                    sizes="100vw"
+                    width={scene.image.width}
+                    height={scene.image.height}
+                    alt={scene.alt}
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    fetchpriority={i === 0 ? 'high' : 'auto'}
+                    decoding="async"
+                    class="scene__img"
+                    data-img
+                  />
+                </picture>
                 <div class="scene__scrim" aria-hidden="true" />
               </div>
 
@@ -140,7 +168,7 @@ const heroStyle = `--broom-cursor: url("${broomCursor.src}") ${hotspot}; --tip-x
     position: relative;
     display: grid;
     min-height: 0;
-    aspect-ratio: 4 / 5;
+    aspect-ratio: 3 / 4;
     overflow: clip;
     isolation: isolate;
   }
@@ -158,7 +186,6 @@ const heroStyle = `--broom-cursor: url("${broomCursor.src}") ${hotspot}; --tip-x
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: var(--focus-x) 50%;
   }
 
   .scene__scrim {
@@ -356,7 +383,7 @@ const heroStyle = `--broom-cursor: url("${broomCursor.src}") ${hotspot}; --tip-x
   :global(html.motion-ok) .hero__stage {
     position: relative;
     width: 100%;
-    aspect-ratio: 4 / 5;
+    aspect-ratio: 3 / 4;
     max-height: 100svh;
     overflow: clip;
     isolation: isolate;
@@ -364,7 +391,7 @@ const heroStyle = `--broom-cursor: url("${broomCursor.src}") ${hotspot}; --tip-x
   }
 
   /*
-   * Mobile: the photo is a 4:5 frame at the top of the screen that fades into a navy
+   * Mobile: the photo is a 3:4 frame at the top of the screen that fades into a navy
    * ground filling the rest of the viewport, with the story copy centred low on it.
    */
   @media (max-width: 47.99rem) {
@@ -376,7 +403,7 @@ const heroStyle = `--broom-cursor: url("${broomCursor.src}") ${hotspot}; --tip-x
 
     :global(html.motion-ok) .scene__media {
       bottom: auto;
-      height: min(125vw, 100%);
+      height: min(133.333vw, 100%);
     }
 
     :global(html.motion-ok) .scene__scrim {
@@ -389,7 +416,7 @@ const heroStyle = `--broom-cursor: url("${broomCursor.src}") ${hotspot}; --tip-x
     /* Copy starts just above the bottom of the photo, leaving room for the longest scene on short phones. */
     :global(html.motion-ok) .scene__content {
       justify-content: center;
-      padding-top: min(calc(min(125vw, 100svh) - 8rem), calc(100svh - 22rem));
+      padding-top: min(calc(min(133.333vw, 100svh) - 8rem), calc(100svh - 22rem));
       padding-bottom: 4rem;
     }
   }
@@ -400,26 +427,6 @@ const heroStyle = `--broom-cursor: url("${broomCursor.src}") ${hotspot}; --tip-x
     aspect-ratio: auto;
     overflow: visible;
     isolation: auto;
-  }
-
-  :global(html.motion-ok) .scene__media {
-    display: flex;
-    justify-content: center;
-  }
-
-  :global(html.motion-ok) .scene__media :global(picture) {
-    display: contents;
-  }
-
-  /* Mobile: image keeps its full 16:9 width so the story can pan across the crew */
-  :global(html.motion-ok) .scene__media :global(.scene__img) {
-    position: relative;
-    inset: auto;
-    flex-shrink: 0;
-    width: auto;
-    max-width: none;
-    height: 100%;
-    aspect-ratio: 1672 / 941;
   }
 
   :global(html.motion-ok) .scene__content {
@@ -616,18 +623,6 @@ const heroStyle = `--broom-cursor: url("${broomCursor.src}") ${hotspot}; --tip-x
   @media (min-width: 48rem) {
     :global(html.motion-ok) .hero__stage {
       aspect-ratio: 16 / 9;
-    }
-
-    :global(html.motion-ok) .scene__media {
-      display: block;
-    }
-
-    :global(html.motion-ok) .scene__media :global(.scene__img) {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      aspect-ratio: auto;
     }
 
     :global(html.motion-ok) .hero__progress {

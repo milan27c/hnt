@@ -15,8 +15,6 @@ interface Scene {
   content: HTMLElement;
   rise: HTMLElement;
   items: HTMLElement[];
-  panFrom: number;
-  panTo: number;
 }
 
 /*
@@ -71,8 +69,6 @@ export function initHero({ lenis, story }: HeroOptions): void {
     content: q(el, '[data-content]'),
     rise: q(el, '[data-rise]'),
     items: gsap.utils.toArray<HTMLElement>(el.querySelectorAll('[data-item]')),
-    panFrom: Number(el.dataset.panFrom ?? 50),
-    panTo: Number(el.dataset.panTo ?? 50),
   }));
 
   if (scenes.length < 4) return;
@@ -81,16 +77,8 @@ export function initHero({ lenis, story }: HeroOptions): void {
 
   const mm = gsap.matchMedia();
 
-  mm.add({ mobile: '(max-width: 47.99rem)', desktop: '(min-width: 48rem)' }, (context) => {
-    const mobile = Boolean(context.conditions?.mobile);
-
-    /** Mobile pans a 16:9 image inside a 4:5 frame. Focal point percent to xPercent, clamped to the image edges. */
-    const pan = (scene: Scene, focus: number) => {
-      if (!mobile) return 0;
-      const overflow = 50 * (1 - stage.clientWidth / Math.max(scene.img.offsetWidth, 1));
-      return gsap.utils.clamp(-overflow, overflow, 50 - focus);
-    };
-
+  // Rebuilt at the tablet breakpoint, where the frame and its art directed images change.
+  mm.add({ mobile: '(max-width: 47.99rem)', desktop: '(min-width: 48rem)' }, () => {
     // Start states for everything the timeline animates.
     scenes.slice(1).forEach((scene) => {
       gsap.set(scene.rise, { yPercent: 105 });
@@ -111,15 +99,14 @@ export function initHero({ lenis, story }: HeroOptions): void {
       },
     });
 
-    // Image motion: slow push in or out while each scene is on screen, panning on mobile.
+    // Image motion: slow push in or out while each scene is on screen. No sideways pan.
     scenes.forEach((scene, i) => {
       const [scaleFrom, scaleTo] = T.scale[i];
-      tl.set(scene.img, { scale: scaleFrom, xPercent: () => pan(scene, scene.panFrom) }, Math.max(0, T.reveal[i] - 0.05));
+      tl.set(scene.img, { scale: scaleFrom }, Math.max(0, T.reveal[i] - 0.05));
       tl.to(
         scene.img,
         {
           scale: scaleTo,
-          xPercent: () => pan(scene, scene.panTo),
           duration: T.motionEnd[i] - T.motionStart[i],
           ease: i === 0 ? 'sine.in' : 'sine.out',
         },
